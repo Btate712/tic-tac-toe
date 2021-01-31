@@ -13,10 +13,11 @@ enum PositionStatus {
 class Game {
   private Output outputMode;
   private PositionStatus[,] board = new PositionStatus[3,3];
-  
+  private PositionStatus currentPlayer;
   public Game(Output mode) {
     this.outputMode = mode;
     InitializeBoard();
+    SetRandomFirstPlayer();
   }
   public void ShowWelcomeMessage() {
     if(outputMode == Output.CLI) {
@@ -32,7 +33,7 @@ class Game {
     Console.WriteLine($" {GetChar(board[2,0])} | {GetChar(board[2,1])} | {GetChar(board[2,2])} ");
   }
 
-  public char GetChar(PositionStatus status) {
+  private char GetChar(PositionStatus status) {
     switch(status) {
       case PositionStatus.Empty:
         return ' ';
@@ -52,4 +53,13 @@ class Game {
     }
   }
 
+  public void move(byte x, byte y) {
+    board[x,y] = currentPlayer;
+    currentPlayer = currentPlayer == PositionStatus.X ? PositionStatus.O : PositionStatus.X;
+  }
+
+  private void SetRandomFirstPlayer() {
+    var rand = new Random();
+    currentPlayer = rand.Next(2) == 1 ? PositionStatus.X : PositionStatus.O;
+  }
 }
