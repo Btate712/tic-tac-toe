@@ -8,6 +8,7 @@ namespace tic_tac_toe
         {
             Game game = new Game(Output.CLI);
             game.ShowWelcomeMessage();
+            game.DrawBoard();
         }
     }
 }
