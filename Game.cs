@@ -14,6 +14,7 @@ class Game {
   private Output outputMode;
   private PositionStatus[,] board = new PositionStatus[3,3];
   private PositionStatus currentPlayer;
+  private bool won = false;
   public Game(Output mode) {
     this.outputMode = mode;
     InitializeBoard();
@@ -26,11 +27,14 @@ class Game {
   }
 
   public void DrawBoard() {
-    Console.WriteLine($" {GetChar(board[0,0])} | {GetChar(board[0,1])} | {GetChar(board[0,2])} ");
-    Console.WriteLine( "-----------");
-    Console.WriteLine($" {GetChar(board[1,0])} | {GetChar(board[1,1])} | {GetChar(board[1,2])} ");
-    Console.WriteLine( "-----------");
-    Console.WriteLine($" {GetChar(board[2,0])} | {GetChar(board[2,1])} | {GetChar(board[2,2])} ");
+    if(outputMode == Output.CLI) {
+      Console.WriteLine();
+      Console.WriteLine($" {GetChar(board[0,0])} | {GetChar(board[0,1])} | {GetChar(board[0,2])} ");
+      Console.WriteLine( "-----------");
+      Console.WriteLine($" {GetChar(board[1,0])} | {GetChar(board[1,1])} | {GetChar(board[1,2])} ");
+      Console.WriteLine( "-----------");
+      Console.WriteLine($" {GetChar(board[2,0])} | {GetChar(board[2,1])} | {GetChar(board[2,2])} ");
+    }
   }
 
   private char GetChar(PositionStatus status) {
@@ -53,13 +57,53 @@ class Game {
     }
   }
 
-  public void move(byte x, byte y) {
-    board[x,y] = currentPlayer;
-    currentPlayer = currentPlayer == PositionStatus.X ? PositionStatus.O : PositionStatus.X;
+  public void Play() {
+    ShowWelcomeMessage();
+    DrawBoard();
+    while(!won) {
+      Position position = GetNextMove();
+      if(PositionAvailable(position)) {
+        Move(position);
+        DrawBoard();
+        CheckForWin();
+        if(!won) NextPlayer();
+      }
+    }
   }
+  private Position GetNextMove() {
+    Console.WriteLine($"{GetChar(currentPlayer)}'s move: ");
+    ConsoleKeyInfo userInput = Console.ReadKey();
+    Position movePosition;
+    if (char.IsDigit(userInput.KeyChar)) {
+      Console.WriteLine(userInput.KeyChar);
+      movePosition = new Position(int.Parse(userInput.KeyChar.ToString()));
+    } else {
+      throw new ArgumentOutOfRangeException();
+    }
+    return movePosition;
+  }
+
+  private void CheckForWin() {
+
+  }
+  private void Move(Position position) {
+    board[position.x, position.y] = currentPlayer;
+  }
+
+  private bool PositionAvailable(Position position) {
+    return board[position.x, position.y] == PositionStatus.Empty;
+  } 
 
   private void SetRandomFirstPlayer() {
     var rand = new Random();
     currentPlayer = rand.Next(2) == 1 ? PositionStatus.X : PositionStatus.O;
+  }
+
+  private void NextPlayer() {
+    if(currentPlayer == PositionStatus.X) {
+      currentPlayer = PositionStatus.O;
+    } else {
+      currentPlayer = PositionStatus.X;
+    }
   }
 }
