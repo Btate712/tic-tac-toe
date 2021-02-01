@@ -60,7 +60,7 @@ class Game {
   public void Play() {
     ShowWelcomeMessage();
     DrawBoard();
-    while(!won) {
+    while(!won && !IsBoardFull()) {
       Position position = GetNextMove();
       if(PositionAvailable(position)) {
         Move(position);
@@ -69,22 +69,65 @@ class Game {
         if(!won) NextPlayer();
       }
     }
-  }
-  private Position GetNextMove() {
-    Console.WriteLine($"{GetChar(currentPlayer)}'s move: ");
-    ConsoleKeyInfo userInput = Console.ReadKey();
-    Position movePosition;
-    if (char.IsDigit(userInput.KeyChar)) {
-      Console.WriteLine(userInput.KeyChar);
-      movePosition = new Position(int.Parse(userInput.KeyChar.ToString()));
+    if(won) {
+      ShowWinMessage();
     } else {
-      throw new ArgumentOutOfRangeException();
+      ShowGameOver();
     }
-    return movePosition;
+  }
+
+  private bool IsBoardFull() {
+    for(int i = 0; i < 3; i++) {
+      for(int j = 0; j < 3; j++) {
+        if(board[i,j] == PositionStatus.Empty) return false;
+      }
+    }
+    return true;
+  }
+
+  private Position GetNextMove() {
+    if(outputMode == Output.CLI) {
+      Console.WriteLine($"{GetChar(currentPlayer)}'s move: ");
+      ConsoleKeyInfo userInput = Console.ReadKey();
+      Position movePosition;
+      if (char.IsDigit(userInput.KeyChar)) {
+        movePosition = new Position(int.Parse(userInput.KeyChar.ToString()));
+        return movePosition;
+      } else {
+        Console.WriteLine("Invalid input. Please enter a number between 1 and 9");
+        return GetNextMove();
+      }
+    } 
+    return new Position(1);
   }
 
   private void CheckForWin() {
-
+    // Check Horizontals
+    for(int i = 0; i < 3; i++) {
+      // Check Horizontals
+      if(board[i,0] != PositionStatus.Empty && 
+        board[i,0] == board[i,1] && 
+        board[i,1] == board[i,2]
+      ) {
+        won = true;
+        return;
+      // Check Verticals
+      } else if (board[0,i] != PositionStatus.Empty 
+        && board[0,i] == board[1,i] && 
+        board[1,i] == board[2,i]
+      ) {
+        won = true;
+        return;
+      }
+    }
+    // Check Diagonals
+    if(board[1,1] != PositionStatus.Empty && 
+      ((board[0,0] == board[1,1] && board[1,1] == board[2,2]) || 
+      (board[0,2] == board[1,1] && board[1,1] == board[2,0]))
+    ) {
+      won = true;
+      return;
+    }
   }
   private void Move(Position position) {
     board[position.x, position.y] = currentPlayer;
@@ -100,10 +143,14 @@ class Game {
   }
 
   private void NextPlayer() {
-    if(currentPlayer == PositionStatus.X) {
-      currentPlayer = PositionStatus.O;
-    } else {
-      currentPlayer = PositionStatus.X;
-    }
+    currentPlayer = currentPlayer == PositionStatus.X ? PositionStatus.O : PositionStatus.X;
+  }
+
+  private void ShowWinMessage() {
+    Console.WriteLine($"Game Over. Congratulations to Player {GetChar(currentPlayer)}!");
+  }
+
+  private void ShowGameOver() {
+    Console.WriteLine("Game Over. There is no winner.");
   }
 }
