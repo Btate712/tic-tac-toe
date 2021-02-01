@@ -20,9 +20,11 @@ class Game {
     InitializeBoard();
     SetRandomFirstPlayer();
   }
+  
   public void ShowWelcomeMessage() {
+    string message = "Welcome to my tic-tac-toe game!";
     if(outputMode == Output.CLI) {
-      Console.WriteLine("Welcome to my tic-tac-toe game!");
+      Console.WriteLine(message);
     }
   }
 
@@ -97,8 +99,9 @@ class Game {
         Console.WriteLine("Invalid input. Please enter a number between 1 and 9");
         return GetNextMove();
       }
-    } 
-    return new Position(1);
+    } else {
+      return new Position(1);
+    }
   }
 
   private void CheckForWin() {
@@ -147,10 +150,16 @@ class Game {
   }
 
   private void ShowWinMessage() {
-    Console.WriteLine($"Game Over. Congratulations to Player {GetChar(currentPlayer)}!");
+    string message = $"Game Over. Congratulations to Player {GetChar(currentPlayer)}!";
+    if(outputMode == Output.CLI) {
+      Console.WriteLine(message);
+    }
   }
 
   private void ShowGameOver() {
-    Console.WriteLine("Game Over. There is no winner.");
+    string message = "Game Over. There is no winner.";
+    if(outputMode == Output.CLI) {
+      Console.WriteLine(message);
+    }
   }
 }
