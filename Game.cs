@@ -12,7 +12,7 @@ enum PositionStatus {
 }
 class Game {
   private Output outputMode;
-  private PositionStatus[,] board = new PositionStatus[3,3];
+  public PositionStatus[,] board { get; } = new PositionStatus[3,3];
   private PositionStatus currentPlayer;
   private bool won = false;
   public Game(Output mode) {
@@ -21,25 +21,22 @@ class Game {
     SetRandomFirstPlayer();
   }
   
-  public void ShowWelcomeMessage() {
-    string message = "Welcome to my tic-tac-toe game!";
-    if(outputMode == Output.CLI) {
-      Console.WriteLine(message);
-    }
-  }
 
   public void DrawBoard() {
-    if(outputMode == Output.CLI) {
-      Console.WriteLine();
-      Console.WriteLine($" {GetChar(board[0,0])} | {GetChar(board[0,1])} | {GetChar(board[0,2])} ");
-      Console.WriteLine( "-----------");
-      Console.WriteLine($" {GetChar(board[1,0])} | {GetChar(board[1,1])} | {GetChar(board[1,2])} ");
-      Console.WriteLine( "-----------");
-      Console.WriteLine($" {GetChar(board[2,0])} | {GetChar(board[2,1])} | {GetChar(board[2,2])} ");
-    }
+    Console.WriteLine();
+    Console.WriteLine($" {GetStatusChar(board[0,0])} | {GetStatusChar(board[0,1])} | {GetStatusChar(board[0,2])} ");
+    Console.WriteLine( "-----------");
+    Console.WriteLine($" {GetStatusChar(board[1,0])} | {GetStatusChar(board[1,1])} | {GetStatusChar(board[1,2])} ");
+    Console.WriteLine( "-----------");
+    Console.WriteLine($" {GetStatusChar(board[2,0])} | {GetStatusChar(board[2,1])} | {GetStatusChar(board[2,2])} ");
+  }
+  private string ShowWelcomeMessage() {
+    string message = "Welcome to my tic-tac-toe game!";
+    if(outputMode == Output.CLI) Console.WriteLine(message);
+    return message;
   }
 
-  private char GetChar(PositionStatus status) {
+  private char GetStatusChar(PositionStatus status) {
     switch(status) {
       case PositionStatus.Empty:
         return ' ';
@@ -66,15 +63,7 @@ class Game {
       Position position = GetNextMove();
       if(PositionAvailable(position)) {
         Move(position);
-        DrawBoard();
-        CheckForWin();
-        if(!won) NextPlayer();
       }
-    }
-    if(won) {
-      ShowWinMessage();
-    } else {
-      ShowGameOver();
     }
   }
 
@@ -88,19 +77,22 @@ class Game {
   }
 
   private Position GetNextMove() {
-    if(outputMode == Output.CLI) {
-      Console.WriteLine($"{GetChar(currentPlayer)}'s move: ");
-      ConsoleKeyInfo userInput = Console.ReadKey();
-      Position movePosition;
-      if (char.IsDigit(userInput.KeyChar)) {
-        movePosition = new Position(int.Parse(userInput.KeyChar.ToString()));
-        return movePosition;
-      } else {
-        Console.WriteLine("Invalid input. Please enter a number between 1 and 9");
-        return GetNextMove();
-      }
+    Console.WriteLine($"{GetStatusChar(currentPlayer)}'s move: ");
+    ConsoleKeyInfo userInput = Console.ReadKey();
+    Position movePosition;
+    if (char.IsDigit(userInput.KeyChar)) {
+      movePosition = new Position(int.Parse(userInput.KeyChar.ToString()));
+      return movePosition;
     } else {
-      return new Position(1);
+      Console.WriteLine("Invalid input. Please enter a number between 1 and 9");
+      return GetNextMove();
+    }
+  }
+
+  private void TrytMove(int position) {
+    var movePosition = new Position(position);
+    if(PositionAvailable(movePosition)) {
+      Move(movePosition);
     }
   }
 
@@ -132,8 +124,18 @@ class Game {
       return;
     }
   }
+
   private void Move(Position position) {
     board[position.x, position.y] = currentPlayer;
+    DrawBoard();
+    CheckForWin();
+    if(won) {
+      ShowWinMessage();
+    } else if (IsBoardFull()) {
+      ShowGameOver();
+    } else {
+      NextPlayer();
+    }
   }
 
   private bool PositionAvailable(Position position) {
@@ -149,17 +151,19 @@ class Game {
     currentPlayer = currentPlayer == PositionStatus.X ? PositionStatus.O : PositionStatus.X;
   }
 
-  private void ShowWinMessage() {
-    string message = $"Game Over. Congratulations to Player {GetChar(currentPlayer)}!";
+  private string ShowWinMessage() {
+    string message = $"Game Over. Congratulations to Player {GetStatusChar(currentPlayer)}!";
     if(outputMode == Output.CLI) {
       Console.WriteLine(message);
     }
+    return message;
   }
 
-  private void ShowGameOver() {
+  private string ShowGameOver() {
     string message = "Game Over. There is no winner.";
     if(outputMode == Output.CLI) {
       Console.WriteLine(message);
     }
+    return message;
   }
 }
